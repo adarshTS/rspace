@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZenBoard</title>
+  <style>
+    /*
+      Percy Visual Demo - Single HTML app
+      - Three views: Login, Dashboard, Logout Confirmation
+      - Rich UI: forms, buttons, cards, tables, charts, icons, badges, progress, modals, dropdowns, tooltips
+      - CSS animations (freezable via a global toggle)
+      - Responsive desktop-friendly layout
+    */
+
+    :root {
+      --bg-gradient-start: #0f2027;
+      --bg-gradient-mid: #203a43;
+      --bg-gradient-end: #2c5364;
+
+      --primary: #4f46e5;
+      --primary-dark: #4338ca;
+      --accent: #06b6d4;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --muted: #64748b;
+
+      --text: #0f172a;
+      --text-inverse: #f8fafc;
+      --card-bg: #ffffff;
+      --card-shadow: rgba(15, 23, 42, 0.15);
+      --sidebar-bg: #111827;
+      --nav-bg: #0b1020;
+      --footer-bg: #0b1222;
+
+      --radius: 12px;
+    }
+
+    /* Global resets */
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text);
+      background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-mid), var(--bg-gradient-end));
+    }
+
+    /* Layout container */
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    /* Simple router: views are stacked and hidden/shown */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* Navigation bar */
+    .nav {
+      background: linear-gradient(180deg, var(--nav-bg), #0e1530);
+      color: var(--text-inverse);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    }
+    .nav .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: conic-gradient(from 180deg, var(--accent), var(--primary), var(--success), var(--accent));
+      box-shadow: 0 6px 12px rgba(6, 182, 212, 0.6);
+      animation: spin 4s linear infinite;
+    }
+    .brand h1 { font-size: 18px; margin: 0; letter-spacing: 0.3px; }
+
+    .nav .actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .btn {
+      border: none;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: filter 120ms ease;
+    }
+    .btn:hover { filter: brightness(1.15); }
+    .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: var(--text-inverse); }
+    .btn-accent { background: linear-gradient(135deg, var(--accent), #22d3ee); color: #0b1020; }
+    .btn-muted { background: #1f2937; color: var(--text-inverse); }
+
+    /* Sidebar */
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: calc(100vh - 64px);
+    }
+    .sidebar {
+      background: linear-gradient(180deg, var(--sidebar-bg), #0c1328);
+      color: var(--text-inverse);
+      padding: 16px;
+      box-shadow: inset -1px 0 0 rgba(255,255,255,0.05);
+    }
+    .sidebar h3 { margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; color: #94a3b8; letter-spacing: 1px; }
+    .sidebar .menu { display: grid; gap: 8px; }
+    .menu a {
+      color: #e5e7eb;
+      text-decoration: none;
+      padding: 10px 12px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .menu a.active, .menu a:hover { background: rgba(255,255,255,0.08); }
+    .menu .badge { background: var(--danger); color: white; font-size: 12px; padding: 2px 8px; border-radius: 999px; }
+
+    /* Content */
+    .content {
+      padding: 20px;
+      display: grid;
+      gap: 16px;
+    }
+
+    /* Cards */
+    .cards { display: grid; grid-template-columns: repeat(3, minmax(240px, 1fr)); gap: 16px; }
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: 0 12px 28px var(--card-shadow);
+      padding: 16px;
+    }
+    .card h4 { margin: 0 0 8px 0; }
+    .stat { display: flex; align-items: center; gap: 12px; }
+    .stat .icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: linear-gradient(135deg, rgba(79,70,229,0.1), rgba(6,182,212,0.15));
+      display: grid; place-items: center; font-weight: 900; color: var(--primary);
+    }
+    .stat .value { font-size: 24px; font-weight: 800; }
+    .stat .delta.up { color: var(--success); }
+    .stat .delta.down { color: var(--danger); }
+
+    /* Table */
+    .table {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: 0 12px 28px var(--card-shadow);
+      overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: linear-gradient(180deg, #f1f5f9, #e5e7eb); }
+    th, td { padding: 12px 10px; text-align: left; font-size: 14px; border-bottom: 1px solid #e5e7eb; }
+    tbody tr:hover { background: #f8fafc; }
+
+    /* Progress bar */
+    .progress { height: 10px; background: #e5e7eb; border-radius: 999px; overflow: hidden; }
+    .progress .bar { height: 100%; background: linear-gradient(90deg, var(--success), var(--accent)); width: 65%; animation: pulseBar 3s ease-in-out infinite; }
+
+    /* Modal */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: none; align-items: center; justify-content: center; z-index: 50; }
+    .modal { width: 520px; max-width: calc(100vw - 40px); background: var(--card-bg); border-radius: var(--radius); box-shadow: 0 20px 40px rgba(0,0,0,0.35); overflow: hidden; }
+    .modal header { background: linear-gradient(135deg, var(--primary), var(--accent)); color: var(--text-inverse); padding: 12px 16px; }
+    .modal .body { padding: 16px; color: var(--text); }
+    .modal .footer { padding: 12px 16px; display: flex; justify-content: flex-end; gap: 8px; }
+
+    /* Dropdown & Tooltip */
+    .dropdown { position: relative; }
+    .dropdown-menu { position: absolute; top: 110%; right: 0; min-width: 180px; background: var(--card-bg); border-radius: 10px; box-shadow: 0 12px 24px rgba(0,0,0,0.2); display: none; }
+    .dropdown-menu a { display: block; padding: 10px 12px; color: var(--text); text-decoration: none; }
+    .dropdown-menu a:hover { background: #f1f5f9; }
+    .tooltip { position: relative; }
+    .tooltip .tip { position: absolute; bottom: 130%; left: 0; background: #111827; color: #fff; padding: 6px 10px; font-size: 12px; border-radius: 6px; display: none; box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
+    .tooltip:hover .tip { display: block; }
+
+    /* Footer */
+    .footer { background: linear-gradient(180deg, var(--footer-bg), #0c1328); color: #cbd5e1; padding: 14px 20px; text-align: center; }
+
+    /* Login */
+    .login-wrap {
+      min-height: calc(100vh - 64px - 56px);
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+    .login-card { width: 520px; max-width: 100%; background: var(--card-bg); border-radius: 18px; box-shadow: 0 16px 40px rgba(0,0,0,0.3); overflow: visible; }
+    .login-card header { background: linear-gradient(135deg, var(--accent), var(--primary)); color: var(--text-inverse); padding: 18px; border-top-left-radius: 18px; border-top-right-radius: 18px; }
+    .login-card .body { padding: 22px 20px; display: flex; flex-direction: column; gap: 14px; }
+    .form-row { display: grid; gap: 6px; }
+    label { font-size: 13px; color: var(--muted); }
+    input[type="text"], input[type="password"] { padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 10px; outline: none; }
+    input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(6,182,212,0.2); }
+    .error { color: var(--danger); font-size: 12px; display: none; }
+    .sub-actions { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .sub-actions .btn { flex-shrink: 0; }
+
+    /* Typography demo */
+    .typography-demo { background: var(--card-bg); border-radius: var(--radius); box-shadow: 0 12px 28px var(--card-shadow); padding: 16px; }
+    .typography-demo h2 { margin: 0 0 10px 0; }
+    .code-box { background: #0f172a; color: #cbd5e1; padding: 10px; border-radius: 8px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px; max-width: 100%; overflow: auto; }
+
+    /* User profile section */
+    .profile { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; }
+    @media (max-width: 460px) {
+      .profile { grid-template-columns: 48px 1fr; }
+      .profile > :last-child { grid-column: 1 / -1; justify-self: start; }
+      .avatar { width: 48px; height: 48px; }
+    }
+    .avatar { width: 64px; height: 64px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #22d3ee, #3b82f6, #9333ea); box-shadow: 0 8px 18px rgba(147,51,234,0.4); display: grid; place-items: center; color: white; font-weight: 900; }
+    .profile .name { font-weight: 700; }
+    .profile .role { color: var(--muted); font-size: 12px; }
+
+    /* Badges */
+    .badges { display: flex; gap: 8px; flex-wrap: wrap; }
+    .badge { padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+    .badge.success { background: rgba(34,197,94,0.2); color: var(--success); }
+    .badge.warning { background: rgba(245,158,11,0.2); color: var(--warning); }
+    .badge.info { background: rgba(6,182,212,0.2); color: var(--accent); }
+
+    /* Charts (CSS-based) */
+    .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .bar-chart { height: 160px; display: flex; align-items: flex-end; gap: 6px; }
+    .bar { width: 24px; background: linear-gradient(180deg, #22c55e, #06b6d4); border-radius: 6px 6px 2px 2px; animation: float 3s ease-in-out infinite; }
+    .bar:nth-child(1) { height: 40%; }
+    .bar:nth-child(2) { height: 60%; animation-delay: 0.2s; }
+    .bar:nth-child(3) { height: 35%; animation-delay: 0.4s; }
+    .bar:nth-child(4) { height: 70%; animation-delay: 0.6s; }
+    .bar:nth-child(5) { height: 50%; animation-delay: 0.8s; }
+
+    .line-chart { height: 160px; background: linear-gradient(180deg, #f8fafc, #eef2f7); border-radius: 10px; position: relative; }
+    .line { position: absolute; left: 0; right: 0; top: 50%; height: 2px; background: linear-gradient(90deg, #9333ea, #06b6d4); animation: shimmer 4s linear infinite; }
+
+    /* Logout view */
+    .logout-wrap { min-height: calc(100vh - 64px - 56px); display: grid; place-items: center; padding: 20px; }
+    .logout-card { width: 420px; max-width: 100%; background: var(--card-bg); border-radius: var(--radius); box-shadow: 0 16px 40px rgba(0,0,0,0.3); overflow: hidden; text-align: center; }
+    .logout-card header { background: linear-gradient(135deg, var(--success), var(--accent)); color: var(--text-inverse); padding: 18px; }
+    .logout-icon { width: 60px; height: 60px; border-radius: 999px; margin: 16px auto; background: radial-gradient(circle at 30% 30%, #22c55e, #06b6d4); box-shadow: 0 10px 18px rgba(34,197,94,0.4); animation: spin 3s linear infinite; }
+
+    /* Animations - use CSS animations (not transitions) */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes pulseBar { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.35); } }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+    @keyframes shimmer { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
+    @keyframes fadeInUp { 0% { opacity: 0; transform: translateY(8px); } 100% { opacity: 1; transform: translateY(0); } }
+
+    /* Global animation pause for Percy consistency */
+    .animations-paused, .animations-paused * { animation-play-state: paused !important; }
+
+    /* Simple responsive tweaks for desktop width */
+    @media (max-width: 1024px) {
+      .cards { grid-template-columns: 1fr 1fr; }
+      .charts { grid-template-columns: 1fr; }
+      .layout { grid-template-columns: 220px 1fr; }
+    }
+
+    /* Page transition container */
+    .page { animation: fadeInUp 380ms ease-out both; }
+  </style>
+</head>
+<body>
+  <div class="app" id="appRoot">
+    <!-- Nav -->
+    <nav class="nav">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <h1>ZenBoard</h1>
+      </div>
+      <div class="actions">
+        <div class="dropdown">
+          <button class="btn btn-muted" id="userMenuBtn">User ▾</button>
+          <div class="dropdown-menu" id="userMenu">
+            <a href="#" data-action="profile">Profile</a>
+            <a href="#" data-action="settings">Settings</a>
+            <a href="#" data-action="logout">Logout</a>
+          </div>
+        </div>
+        <button class="btn btn-accent tooltip" id="toggleAnimationsBtn">Toggle Animations
+          <span class="tip">Pauses CSS animations for Percy screenshots</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Login View -->
+    <section class="view active page" id="view-login">
+      <div class="login-wrap">
+        <div class="login-card">
+          <header>
+            <h2>Welcome!</h2>
+            <p style="margin:0;color:#e2e8f0">Sign in to continue</p>
+          </header>
+          <div class="body">
+            <div class="profile" style="margin-bottom:10px">
+              <div>
+                <div class="name">👋 Hey user</div>
+              </div>
+              <div>
+                <button class="btn btn-muted" id="openLoginHelp">Help</button>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <label for="username">Username</label>
+              <input type="text" id="username" placeholder="Enter username" />
+              <div class="error" id="userErr">Username is required</div>
+            </div>
+            <div class="form-row">
+              <label for="password">Password</label>
+              <input type="password" id="password" placeholder="Enter password" />
+              <div class="error" id="passErr">Password must be at least 6 characters</div>
+            </div>
+            <div class="sub-actions">
+              <label style="display:flex; align-items:center; gap:6px; font-size:13px;">
+                <input type="checkbox" id="rememberMe" /> Remember me
+              </label>
+              <button class="btn btn-primary" id="loginBtn">Login</button>
+            </div>
+
+            <div class="typography-demo" style="margin-top:10px">
+              <h2>Typography</h2>
+              <p>Headings, body, and <strong>bold</strong> text with <em>italics</em>.</p>
+              <pre class="code-box"><code>// Code snippet for Percy
+const takeSnapshot = () =&gt; percySnapshot('Login');
+</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dashboard View -->
+    <section class="view page" id="view-dashboard">
+      <div class="layout">
+        <aside class="sidebar">
+          <h3>Navigation</h3>
+          <div class="menu">
+            <a href="#" class="active"><span>🏠</span> Overview</a>
+            <a href="#"><span>📊</span> Reports <span class="badge">3</span></a>
+            <a href="#"><span>⚙️</span> Settings</a>
+            <a href="#"><span>🔔</span> Notifications</a>
+          </div>
+          <div style="margin-top:16px" class="progress" aria-label="project progress">
+            <div class="bar"></div>
+          </div>
+        </aside>
+
+        <main class="content">
+          <div class="profile card">
+            <div class="avatar">ATS</div>
+            <div>
+              <div class="name">Adarsh S</div>
+              <div class="badges" style="margin-top:6px">
+                <span class="badge success">Online</span>
+                <span class="badge warning">Review</span>
+                <span class="badge info">New</span>
+              </div>
+            </div>
+            <div class="dropdown">
+              <button class="btn btn-muted" id="profileMenuBtn">Actions ▾</button>
+              <div class="dropdown-menu" id="profileMenu">
+                <a href="#">Edit Profile</a>
+                <a href="#">Manage Roles</a>
+                <a href="#">Suspend</a>
+              </div>
+            </div>
+          </div>
+
+          <section class="cards">
+            <article class="card">
+              <h4>Revenue</h4>
+              <div class="stat">
+                <div class="icon">$</div>
+                <div class="value">$128,300</div>
+                <div class="delta up">▲ 8.3%</div>
+              </div>
+            </article>
+            <article class="card">
+              <h4>Users</h4>
+              <div class="stat">
+                <div class="icon">👥</div>
+                <div class="value">12,450</div>
+                <div class="delta down">▼ 1.2%</div>
+              </div>
+            </article>
+            <article class="card">
+              <h4>Latency</h4>
+              <div class="stat">
+                <div class="icon">⏱</div>
+                <div class="value">284 ms</div>
+                <div class="delta up" style="color: var(--warning)">▲ 2.1%</div>
+              </div>
+            </article>
+          </section>
+
+          <section class="charts">
+            <article class="card">
+              <h4>Bar Chart</h4>
+              <div class="bar-chart" aria-label="bar chart">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+              </div>
+            </article>
+            <article class="card">
+              <h4>Line Indicator</h4>
+              <div class="line-chart" aria-label="line chart">
+                <div class="line"></div>
+              </div>
+            </article>
+          </section>
+
+          <section class="table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Project</th>
+                  <th>Status</th>
+                  <th>Owner</th>
+                  <th>Updated</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>UI Revamp</td>
+                  <td><span class="badge info">In Progress</span></td>
+                  <td>Grace</td>
+                  <td>2h ago</td>
+                </tr>
+                <tr>
+                  <td>Charts</td>
+                  <td><span class="badge success">Live</span></td>
+                  <td>Linus</td>
+                  <td>1d ago</td>
+                </tr>
+                <tr>
+                  <td>Auth</td>
+                  <td><span class="badge warning">Review</span></td>
+                  <td>Ada</td>
+                  <td>3d ago</td>
+                </tr>
+                <tr>
+                  <td>API</td>
+                  <td><span class="badge warning" style="color:var(--danger)">Blocked</span></td>
+                  <td>Ken</td>
+                  <td>5d ago</td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+
+          <section class="card" id="interactiveWidgets">
+            <h4>Interactive Widgets</h4>
+            <div style="display:flex; gap:10px; flex-wrap:wrap">
+              <button class="btn btn-primary" id="openModalBtn">Open Modal</button>
+              <button class="btn btn-accent" id="notifyBtn">Show Notification</button>
+              <button class="btn btn-muted tooltip" id="fakeLoadBtn">Fake Load
+                <span class="tip">Simulated progress for visual change</span>
+              </button>
+              <select id="colorScheme" class="btn" style="background:#f1f5f9">
+                <option value="default">Default</option>
+                <option value="ocean">Ocean</option>
+                <option value="sunset">Sunset</option>
+              </select>
+            </div>
+            <div style="margin-top:12px" class="progress" aria-label="fake load">
+              <div class="bar" id="fakeBar" style="width:35%"></div>
+            </div>
+          </section>
+
+          <footer class="footer card" style="padding:12px;">
+            <div>© 2025 ATS<span style="color:#94a3b8">— Crafted for a DEMO</span></div>
+          </footer>
+        </main>
+      </div>
+    </section>
+
+    <!-- Logout View -->
+    <section class="view page" id="view-logout">
+      <div class="logout-wrap">
+        <div class="logout-card">
+          <header>
+            <h2>Logged Out</h2>
+            <p style="margin:0;color:#e2e8f0">See you next time!</p>
+          </header>
+          <div class="body" style="padding:18px">
+            <div class="logout-icon" aria-hidden="true"></div>
+            <p style="margin-top:0">Your session has ended successfully.</p>
+            <p style="color:var(--muted)">Animations can be paused for consistent Percy shots.</p>
+            <div style="display:flex; justify-content:center; gap:8px; margin-top:12px">
+              <button class="btn btn-primary" id="backToLogin">Back to Login</button>
+              <button class="btn btn-accent" id="toDashboard">Go to Dashboard</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modal Backdrop -->
+    <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <header>
+          <h3 id="modalTitle" style="margin:0">Confirm Action</h3>
+        </header>
+        <div class="body">
+          <p>Proceeding may change visual state. Percy will catch it!</p>
+        </div>
+        <div class="footer">
+          <button class="btn" id="closeModal">Cancel</button>
+          <button class="btn btn-primary" id="confirmModal">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Simple client-side "router" toggling views
+    const views = {
+      login: document.getElementById('view-login'),
+      dashboard: document.getElementById('view-dashboard'),
+      logout: document.getElementById('view-logout'),
+    };
+
+    function showView(name) {
+      Object.values(views).forEach(v => v.classList.remove('active'));
+      views[name].classList.add('active');
+      // Reset dropdowns and modals when switching
+      hideDropdown('userMenu');
+      hideDropdown('profileMenu');
+      hideModal();
+    }
+
+    // Dropdown helpers
+    function toggleDropdown(id) {
+      const el = document.getElementById(id);
+      el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    }
+    function hideDropdown(id) {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    }
+
+    // Modal helpers
+    function showModal() {
+      const mb = document.getElementById('modalBackdrop');
+      mb.style.display = 'flex';
+    }
+    function hideModal() {
+      const mb = document.getElementById('modalBackdrop');
+      if (mb) mb.style.display = 'none';
+    }
+
+    // Animation global toggle for Percy consistency
+    const appRoot = document.getElementById('appRoot');
+    let animationsPaused = false;
+    function toggleAnimations() {
+      animationsPaused = !animationsPaused;
+      if (animationsPaused) {
+        appRoot.classList.add('animations-paused');
+      } else {
+        appRoot.classList.remove('animations-paused');
+      }
+    }
+
+    // Fake load progress animator (uses CSS animation; we only nudge width)
+    function bumpProgress() {
+      const fb = document.getElementById('fakeBar');
+      const current = parseInt(fb.style.width);
+      const next = Math.min(100, current + Math.floor(Math.random() * 20 + 5));
+      fb.style.width = next + '%';
+    }
+
+    // Color scheme switcher to demonstrate subtle visual diffs
+    function setScheme(scheme) {
+      const r = document.documentElement;
+      if (scheme === 'ocean') {
+        r.style.setProperty('--bg-gradient-start', '#001f3f');
+        r.style.setProperty('--bg-gradient-mid', '#005f73');
+        r.style.setProperty('--bg-gradient-end', '#0a9396');
+        r.style.setProperty('--primary', '#3a86ff');
+        r.style.setProperty('--accent', '#00bcd4');
+      } else if (scheme === 'sunset') {
+        r.style.setProperty('--bg-gradient-start', '#ff7e5f');
+        r.style.setProperty('--bg-gradient-mid', '#feb47b');
+        r.style.setProperty('--bg-gradient-end', '#ff9a9e');
+        r.style.setProperty('--primary', '#ef476f');
+        r.style.setProperty('--accent', '#ffd166');
+      } else {
+        // default
+        r.style.setProperty('--bg-gradient-start', '#0f2027');
+        r.style.setProperty('--bg-gradient-mid', '#203a43');
+        r.style.setProperty('--bg-gradient-end', '#2c5364');
+        r.style.setProperty('--primary', '#4f46e5');
+        r.style.setProperty('--accent', '#06b6d4');
+      }
+    }
+
+    // Login validation
+    function validateLogin() {
+      const u = document.getElementById('username');
+      const p = document.getElementById('password');
+      const ue = document.getElementById('userErr');
+      const pe = document.getElementById('passErr');
+      let ok = true;
+      if (!u.value.trim()) { ue.style.display = 'block'; ok = false; } else { ue.style.display = 'none'; }
+      if (!p.value.trim() || p.value.length < 6) { pe.style.display = 'block'; ok = false; } else { pe.style.display = 'none'; }
+      return ok;
+    }
+
+    // Event wiring
+    document.getElementById('loginBtn').addEventListener('click', () => {
+      if (!validateLogin()) return;
+      showView('dashboard');
+    });
+
+    document.getElementById('openLoginHelp').addEventListener('click', showModal);
+
+    document.getElementById('userMenuBtn').addEventListener('click', () => toggleDropdown('userMenu'));
+    document.getElementById('profileMenuBtn').addEventListener('click', () => toggleDropdown('profileMenu'));
+
+    document.getElementById('toggleAnimationsBtn').addEventListener('click', toggleAnimations);
+
+    document.getElementById('openModalBtn').addEventListener('click', showModal);
+    document.getElementById('closeModal').addEventListener('click', hideModal);
+    document.getElementById('confirmModal').addEventListener('click', () => { hideModal(); alert('Confirmed! Visual change occurred.'); });
+
+    document.getElementById('notifyBtn').addEventListener('click', () => {
+      const n = document.createElement('div');
+      n.textContent = 'New activity recorded';
+      n.style.position = 'fixed';
+      n.style.right = '16px';
+      n.style.bottom = '16px';
+      n.style.background = 'linear-gradient(135deg, var(--accent), var(--primary))';
+      n.style.color = 'white';
+      n.style.padding = '10px 12px';
+      n.style.borderRadius = '10px';
+      n.style.boxShadow = '0 12px 24px rgba(0,0,0,0.3)';
+      n.style.zIndex = '60';
+      document.body.appendChild(n);
+      setTimeout(() => n.remove(), 2500);
+    });
+
+    document.getElementById('fakeLoadBtn').addEventListener('click', bumpProgress);
+    document.getElementById('colorScheme').addEventListener('change', (e) => setScheme(e.target.value));
+
+    document.querySelector('[data-action="logout"]').addEventListener('click', () => showView('logout'));
+    document.getElementById('backToLogin').addEventListener('click', () => showView('login'));
+    document.getElementById('toDashboard').addEventListener('click', () => showView('dashboard'));
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+      const userBtn = document.getElementById('userMenuBtn');
+      const profileBtn = document.getElementById('profileMenuBtn');
+      const userMenu = document.getElementById('userMenu');
+      const profileMenu = document.getElementById('profileMenu');
+      if (!userBtn.contains(e.target) && !userMenu.contains(e.target)) hideDropdown('userMenu');
+      if (!profileBtn.contains(e.target) && !profileMenu.contains(e.target)) hideDropdown('profileMenu');
+    });
+  </script>
+</body>
+</html>
