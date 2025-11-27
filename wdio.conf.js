@@ -15,8 +15,8 @@ exports.config = {
                         buildName: 'e2e-tests',
                         buildTag
                     },
-                // percy: 'false',
-                // percyCaptureMode: 'auto'
+                percy: true,
+                percyCaptureMode: 'auto'
             },
         ],
     ],
