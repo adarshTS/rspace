@@ -18,6 +18,3 @@ open http://localhost:8080/index.html
 ```
 
 ## Percy Tips
-- Use the `Toggle Animations` button to freeze CSS animations before snapshots.
-- Navigate through views and take snapshots per page (e.g., `Login`, `Dashboard`, `Logout`).
-- Experiment with the `Color Scheme` dropdown to observe subtle visual diffs.
