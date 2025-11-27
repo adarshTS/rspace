@@ -1,20 +1,11 @@
-# Percy Visual Testing Demo (Single HTML)
+# rspace E2E Tests
 
-This demo is a single, self-contained HTML file designed to showcase rich visual complexity for Percy visual testing: multiple views (Login, Dashboard, Logout), diverse UI elements, CSS-only animations, and a global animation pause toggle for consistent screenshots.
+## Run Tests
 
-## Features
-- Three views in one file: Login, Dashboard, Logout confirmation
-- Rich UI: buttons, inputs, cards, tables, charts, badges, progress bars, modals, dropdowns, tooltips
-- CSS animations (spinning logo, bar pulsation, floating bars, shimmer line)
-- Global animation pause (`Toggle Animations` button) adds/removes `.animations-paused`
-- Responsive for desktop widths (light tweaks under 1024px)
-
-## Run Locally
-- Open `index.html` directly in a browser, or serve locally:
+- Install deps: `npm install`
+- Ensure the app is available at `http://127.0.0.1:5500/` (e.g., VS Code Live Server)
+- Execute WDIO:
 
 ```zsh
-python3 -m http.server 8080 --directory /Users/adarsh/Documents/percy/web/rspace
-open http://localhost:8080/index.html
+npx wdio run wdio.conf.js
 ```
-
-## Percy Tips
