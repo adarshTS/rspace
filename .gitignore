@@ -11,3 +11,7 @@ allure-results/
 allure-report/
 reports/
 .vscode/
+snapshot/
+logs/
+*.dmg
+*.app/

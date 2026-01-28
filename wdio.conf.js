@@ -9,26 +9,18 @@ exports.config = {
         'browserstack',
             { browserstackLocal: true, 
                 opts: { forcelocal: false },
+                percy: true,
+                percyCaptureMode: 'auto',
                 testObservability: true,
                 testObservabilityOptions: {
                         projectName: 'rspace-web-percy',
                         buildName: 'e2e-tests',
                         buildTag
                     },
-                percy: true,
-                percyCaptureMode: 'auto'
             },
         ],
     ],
     capabilities: [
-        {
-        browserName: 'Chrome',
-        'bstack:options': {
-            browserVersion: '120.0',
-            os: 'Windows',
-            osVersion: '10'
-        }
-        },
         {
         browserName: 'Safari',
         'bstack:options': {
@@ -36,21 +28,15 @@ exports.config = {
             os: 'OS X',
             osVersion: 'Monterey'
         }
-        },
-        {
-        browserName: 'Chromium',
-        'bstack:options': {
-            deviceOrientation: 'portrait',
-            deviceName: 'iPhone 13',
-            osVersion: '15'
-        }
         }
     ],
     commonCapabilities: {
         'bstack:options': {
         buildIdentifier: "${BUILD_NUMBER}",
         consoleLogs: 'info',
-        networkLogs: 'true'
+        networkLogs: 'true',
+        projectName: 'rspace-web-percy',
+        buildName: 'e2e-tests',
         }
      },
   maxInstances: 10,

@@ -1,9 +1,9 @@
 
 
-Thu Nov 27 2025 10:38:32:735 GMT+0530 (IST) -- Starting configuration console on http://localhost:45454
-Thu Nov 27 2025 10:38:34:777 GMT+0530 (IST) -- [INFO] Started the BrowserStack Binary server on 45691, PID: 49126
-Thu Nov 27 2025 10:38:35:830 GMT+0530 (IST) -- [SUCCESS] You can now access your local server(s) in our remote browser
+Wed Jan 28 2026 14:52:28:898 GMT+0530 (IST) -- [WARNING] Detected instance of BrowserStackLocal Application, running in onlyAutomate mode to avoid port clash
+Wed Jan 28 2026 14:52:28:982 GMT+0530 (IST) -- [WARNING] Skipping initialisation of configuration console because: port already in use by another Binary
+Wed Jan 28 2026 14:52:30:123 GMT+0530 (IST) -- [SUCCESS] You can now access your local server(s) in our remote browser
 
-Thu Nov 27 2025 10:38:38:536 GMT+0530 (IST) -- Press Ctrl-C to exit
+Wed Jan 28 2026 14:52:30:160 GMT+0530 (IST) -- Press Ctrl-C to exit
 
 
